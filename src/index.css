@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-notion-gray-50 dark:bg-notion-gray-900 text-notion-gray-900 dark:text-white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .notion-card {
+    @apply bg-white dark:bg-notion-gray-800 rounded-lg border border-notion-gray-200 dark:border-notion-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .notion-button {
+    @apply px-4 py-2 rounded-md font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-notion-gray-800;
+  }
+  
+  .notion-button-primary {
+    @apply notion-button bg-notion-blue-600 text-white hover:bg-notion-blue-700 focus:ring-notion-blue-500;
+  }
+  
+  .notion-button-secondary {
+    @apply notion-button bg-notion-gray-100 dark:bg-notion-gray-700 text-notion-gray-700 dark:text-notion-gray-300 hover:bg-notion-gray-200 dark:hover:bg-notion-gray-600 focus:ring-notion-gray-500;
+  }
+  
+  .notion-input {
+    @apply w-full px-3 py-2 border border-notion-gray-300 dark:border-notion-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-notion-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-notion-gray-700 text-notion-gray-900 dark:text-white placeholder-notion-gray-500 dark:placeholder-notion-gray-400;
+  }
+}
