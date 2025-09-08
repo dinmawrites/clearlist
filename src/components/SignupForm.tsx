@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, User, UserPlus } from 'lucide-react';
+import { Mail, User, UserPlus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { SignupCredentials } from '../types/auth';
 
@@ -13,23 +13,53 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSignu
   const [credentials, setCredentials] = useState<SignupCredentials>({
     name: '',
     email: '',
-    password: '',
-    confirmPassword: '',
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
   const { signup, isLoading } = useAuth();
+
+  const validateForm = (): boolean => {
+    const errors: {[key: string]: string} = {};
+
+    // Name validation
+    if (!credentials.name.trim()) {
+      errors.name = 'Full name is required';
+    } else if (credentials.name.trim().length < 2) {
+      errors.name = 'Name must be at least 2 characters';
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!credentials.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!emailRegex.test(credentials.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setValidationErrors({});
+
+    // Validate form before submission
+    if (!validateForm()) {
+      return;
+    }
 
     try {
-      await signup(credentials);
-      // If signup is successful, show confirmation page
+      console.log('Starting signup process...');
+      const result = await signup(credentials);
+      console.log('Signup completed, result:', result);
+      
+      // Magic link sent successfully - show confirmation page
+      console.log('Calling onSignupSuccess with email:', credentials.email);
       onSignupSuccess(credentials.email);
     } catch (err) {
+      console.error('Signup error:', err);
       setError(err instanceof Error ? err.message : 'Signup failed');
     }
   };
@@ -57,7 +87,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSignu
             Create account
           </h2>
           <p className="text-notion-gray-500 dark:text-notion-gray-400">
-            Get started with your personal task manager
+            We'll send you a magic link to get started
           </p>
         </div>
 
@@ -85,10 +115,13 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSignu
                 required
                 value={credentials.name}
                 onChange={handleChange}
-                className="notion-input pl-10"
+                className={`notion-input pl-10 ${validationErrors.name ? 'border-red-500 focus:border-red-500' : ''}`}
                 placeholder="Enter your full name"
               />
             </div>
+            {validationErrors.name && (
+              <p className="mt-1 text-sm text-red-600">{validationErrors.name}</p>
+            )}
           </div>
 
           <div>
@@ -104,63 +137,15 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSignu
                 required
                 value={credentials.email}
                 onChange={handleChange}
-                className="notion-input pl-10"
+                className={`notion-input pl-10 ${validationErrors.email ? 'border-red-500 focus:border-red-500' : ''}`}
                 placeholder="Enter your email"
               />
             </div>
+            {validationErrors.email && (
+              <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+            )}
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-notion-gray-700 dark:text-notion-gray-300 mb-2">
-              Password
-            </label>
-            <div className="relative">
-              <Lock size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-notion-gray-400 dark:text-notion-gray-500" />
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={credentials.password}
-                onChange={handleChange}
-                className="notion-input pl-10 pr-10"
-                placeholder="Create a password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-notion-gray-400 dark:text-notion-gray-500 hover:text-notion-gray-600 dark:hover:text-notion-gray-400"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-notion-gray-700 dark:text-notion-gray-300 mb-2">
-              Confirm password
-            </label>
-            <div className="relative">
-              <Lock size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-notion-gray-400 dark:text-notion-gray-500" />
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                required
-                value={credentials.confirmPassword}
-                onChange={handleChange}
-                className="notion-input pl-10 pr-10"
-                placeholder="Confirm your password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-notion-gray-400 dark:text-notion-gray-500 hover:text-notion-gray-600 dark:hover:text-notion-gray-400"
-              >
-                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-          </div>
 
           <button
             type="submit"
@@ -170,10 +155,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSignu
             {isLoading ? (
               <div className="flex items-center justify-center">
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Creating account...
+                Sending magic link...
               </div>
             ) : (
-              'Create account'
+              'Send Magic Link'
             )}
           </button>
         </form>

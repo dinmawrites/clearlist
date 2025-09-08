@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, Mail, Lock, Camera, Save, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, User, Mail, Camera, Save } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { ProfileUpdateCredentials } from '../types/auth';
 import { useNavigate } from 'react-router-dom';
@@ -13,9 +13,6 @@ export const ProfilePage: React.FC = () => {
   const [formData, setFormData] = useState<ProfileUpdateCredentials>({
     name: user?.name || '',
     email: user?.email || '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
     profilePhoto: user?.profilePhoto || '',
   });
 
@@ -25,17 +22,11 @@ export const ProfilePage: React.FC = () => {
       setFormData({
         name: user.name || '',
         email: user.email || '',
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
         profilePhoto: user.profilePhoto || '',
       });
     }
   }, [user]);
   
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -94,13 +85,6 @@ export const ProfilePage: React.FC = () => {
       if (formData.profilePhoto !== (user?.profilePhoto || '')) {
         updateData.profilePhoto = formData.profilePhoto;
       }
-      
-      if (formData.newPassword) {
-        updateData.currentPassword = formData.currentPassword;
-        updateData.newPassword = formData.newPassword;
-        updateData.confirmPassword = formData.confirmPassword;
-      }
-
 
       // Check if there are any changes
       if (Object.keys(updateData).length === 0) {
@@ -110,14 +94,6 @@ export const ProfilePage: React.FC = () => {
 
       await updateProfile(updateData);
       setSuccess('Profile updated successfully!');
-      
-      // Clear password fields after successful update
-      setFormData(prev => ({
-        ...prev,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      }));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update profile');
     }
@@ -246,93 +222,7 @@ export const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Password Change Section */}
-            <div className="border-t border-notion-gray-200 dark:border-notion-gray-700 pt-6">
-              <h3 className="text-md font-medium text-notion-gray-900 dark:text-white mb-4">
-                Change Password
-              </h3>
-              <p className="text-sm text-notion-gray-600 dark:text-notion-gray-400 mb-4">
-                Leave password fields empty if you don't want to change your password
-              </p>
 
-              {/* Current Password */}
-              <div className="mb-4">
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-notion-gray-700 dark:text-notion-gray-300 mb-2">
-                  Current Password
-                </label>
-                <div className="relative">
-                  <Lock size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-notion-gray-400 dark:text-notion-gray-500" />
-                  <input
-                    type={showCurrentPassword ? 'text' : 'password'}
-                    id="currentPassword"
-                    name="currentPassword"
-                    value={formData.currentPassword}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-12 py-3 border border-notion-gray-300 dark:border-notion-gray-600 rounded-lg bg-white dark:bg-notion-gray-800 text-notion-gray-900 dark:text-white placeholder-notion-gray-500 dark:placeholder-notion-gray-400 focus:ring-2 focus:ring-notion-blue-500 focus:border-transparent transition-colors"
-                    placeholder="Enter current password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-notion-gray-400 dark:text-notion-gray-500 hover:text-notion-gray-600 dark:hover:text-notion-gray-300"
-                  >
-                    {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* New Password */}
-              <div className="mb-4">
-                <label htmlFor="newPassword" className="block text-sm font-medium text-notion-gray-700 dark:text-notion-gray-300 mb-2">
-                  New Password
-                </label>
-                <div className="relative">
-                  <Lock size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-notion-gray-400 dark:text-notion-gray-500" />
-                  <input
-                    type={showNewPassword ? 'text' : 'password'}
-                    id="newPassword"
-                    name="newPassword"
-                    value={formData.newPassword}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-12 py-3 border border-notion-gray-300 dark:border-notion-gray-600 rounded-lg bg-white dark:bg-notion-gray-800 text-notion-gray-900 dark:text-white placeholder-notion-gray-500 dark:placeholder-notion-gray-400 focus:ring-2 focus:ring-notion-blue-500 focus:border-transparent transition-colors"
-                    placeholder="Enter new password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-notion-gray-400 dark:text-notion-gray-500 hover:text-notion-gray-600 dark:hover:text-notion-gray-300"
-                  >
-                    {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-notion-gray-700 dark:text-notion-gray-300 mb-2">
-                  Confirm New Password
-                </label>
-                <div className="relative">
-                  <Lock size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-notion-gray-400 dark:text-notion-gray-500" />
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-12 py-3 border border-notion-gray-300 dark:border-notion-gray-600 rounded-lg bg-white dark:bg-notion-gray-800 text-notion-gray-900 dark:text-white placeholder-notion-gray-500 dark:placeholder-notion-gray-400 focus:ring-2 focus:ring-notion-blue-500 focus:border-transparent transition-colors"
-                    placeholder="Confirm new password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-notion-gray-400 dark:text-notion-gray-500 hover:text-notion-gray-600 dark:hover:text-notion-gray-300"
-                  >
-                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
-            </div>
 
             {/* Error and Success Messages */}
             {error && (

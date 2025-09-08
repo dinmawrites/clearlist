@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, AuthState, LoginCredentials, SignupCredentials, ProfileUpdateCredentials } from '../types/auth';
+import { User, AuthState, MagicLinkCredentials, SignupCredentials, ProfileUpdateCredentials } from '../types/auth';
 import { supabase } from '../lib/supabase';
 
 interface AuthContextType extends AuthState {
-  login: (credentials: LoginCredentials) => Promise<void>;
+  sendMagicLink: (credentials: MagicLinkCredentials) => Promise<void>;
   signup: (credentials: SignupCredentials) => Promise<any>;
   logout: () => void;
   updateProfile: (credentials: ProfileUpdateCredentials) => Promise<void>;
@@ -77,24 +77,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (credentials: LoginCredentials) => {
+  const sendMagicLink = async (credentials: MagicLinkCredentials) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithOtp({
         email: credentials.email,
-        password: credentials.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth`,
+          shouldCreateUser: false, // Don't create new users for login
+        },
       });
 
       if (error) {
         throw new Error(error.message);
       }
 
-      // Check if email is confirmed
-      if (data.user && !data.user.email_confirmed_at) {
-        throw new Error('Please check your email and click the confirmation link before signing in.');
-      }
-
-      // User will be set automatically by the auth state change listener
+      // Magic link sent successfully - user will be redirected when they click the link
     } catch (error) {
       throw error;
     } finally {
@@ -103,30 +101,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const signup = async (credentials: SignupCredentials) => {
+    console.log('AuthContext signup called with:', credentials);
     setIsLoading(true);
     try {
-      // Validate passwords match
-      if (credentials.password !== credentials.confirmPassword) {
-        throw new Error('Passwords do not match');
-      }
-
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signInWithOtp({
         email: credentials.email,
-        password: credentials.password,
         options: {
           data: {
             name: credentials.name,
           },
+          emailRedirectTo: `${window.location.origin}/auth`,
+          shouldCreateUser: true, // Allow automatic signup
         },
       });
 
+      console.log('Supabase signInWithOtp response:', { data, error });
+
       if (error) {
+        console.error('Supabase error:', error);
         throw new Error(error.message);
       }
       
-      // Return the signup data so the UI can handle the confirmation flow
-      return data;
+      console.log('Magic link sent successfully');
+      // Return success - magic link sent
+      return { success: true };
     } catch (error) {
+      console.error('Signup error in AuthContext:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -140,30 +140,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     setIsLoading(true);
     try {
-      // Update password if provided
-      if (credentials.newPassword) {
-        if (credentials.newPassword !== credentials.confirmPassword) {
-          throw new Error('New passwords do not match');
-        }
-
-        const { error } = await supabase.auth.updateUser({
-          password: credentials.newPassword,
-        });
-
-        if (error) {
-          throw new Error(error.message);
-        }
-      }
-
-      // Update user metadata (name, email, profile photo)
+      // Update user metadata (name, profile photo)
       const updates: any = {};
       
       if (credentials.name) {
         updates.name = credentials.name;
-      }
-      
-      if (credentials.email && credentials.email !== user.email) {
-        updates.email = credentials.email;
       }
       
       if (credentials.profilePhoto) {
@@ -203,7 +184,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     isAuthenticated: !!user,
     isLoading,
-    login,
+    sendMagicLink,
     signup,
     logout,
     updateProfile,

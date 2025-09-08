@@ -1,21 +1,12 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, ArrowRight } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 
 interface EmailConfirmedPageProps {
   onContinue: () => void;
 }
 
 export const EmailConfirmedPage: React.FC<EmailConfirmedPageProps> = ({ onContinue }) => {
-  const { isAuthenticated } = useAuth();
-
-  // Auto-redirect if user is already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      onContinue();
-    }
-  }, [isAuthenticated, onContinue]);
 
   return (
     <motion.div
@@ -35,14 +26,14 @@ export const EmailConfirmedPage: React.FC<EmailConfirmedPageProps> = ({ onContin
           </h2>
           
           <p className="text-notion-gray-600 dark:text-notion-gray-400 mb-8">
-            Your email has been successfully verified. You can now access your account and start managing your tasks.
+            Your email has been successfully verified. You can now sign in to your account and start managing your tasks.
           </p>
           
           <button
-            onClick={onContinue}
+            onClick={() => window.location.href = '/'}
             className="w-full notion-button-primary flex items-center justify-center space-x-2"
           >
-            <span>Continue to Dashboard</span>
+            <span>Go to Dashboard</span>
             <ArrowRight size={16} />
           </button>
         </div>

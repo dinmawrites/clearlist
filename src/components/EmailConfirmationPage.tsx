@@ -29,7 +29,7 @@ export const EmailConfirmationPage: React.FC<EmailConfirmationPageProps> = ({
           </h2>
           
           <p className="text-notion-gray-600 dark:text-notion-gray-400 mb-6">
-            We've sent a confirmation link to:
+            We've sent a magic link to:
           </p>
           
           <div className="bg-notion-gray-100 dark:bg-notion-gray-800 rounded-lg p-3 mb-6">
@@ -41,7 +41,7 @@ export const EmailConfirmationPage: React.FC<EmailConfirmationPageProps> = ({
           <div className="space-y-4 text-sm text-notion-gray-600 dark:text-notion-gray-400">
             <div className="flex items-start space-x-3">
               <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
-              <p>Click the confirmation link in your email</p>
+              <p>Click the magic link in your email</p>
             </div>
             <div className="flex items-start space-x-3">
               <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
@@ -49,7 +49,7 @@ export const EmailConfirmationPage: React.FC<EmailConfirmationPageProps> = ({
             </div>
             <div className="flex items-start space-x-3">
               <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
-              <p>Then come back here to sign in</p>
+              <p>You'll be automatically signed in</p>
             </div>
           </div>
           

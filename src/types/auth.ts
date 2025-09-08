@@ -4,7 +4,6 @@ export interface User {
   name: string;
   profilePhoto?: string;
   createdAt: Date;
-  password?: string; // For demo purposes - in real app, this would be hashed
 }
 
 export interface AuthState {
@@ -13,23 +12,17 @@ export interface AuthState {
   isLoading: boolean;
 }
 
-export interface LoginCredentials {
+export interface MagicLinkCredentials {
   email: string;
-  password: string;
 }
 
 export interface SignupCredentials {
   name: string;
   email: string;
-  password: string;
-  confirmPassword: string;
 }
 
 export interface ProfileUpdateCredentials {
   name?: string;
   email?: string;
-  currentPassword?: string;
-  newPassword?: string;
-  confirmPassword?: string;
   profilePhoto?: string;
 }
